@@ -1,0 +1,22 @@
+os: linux
+dist: bionic
+
+before_script:
+  - git clone https://github.com/flutter/flutter.git -b stable
+  - export PATH=`pwd`/flutter/bin:`pwd`/flutter/bin/cache/dart-sdk/bin:$PATH
+  - flutter doctor
+
+script:
+  - flutter build web
+
+cache:
+  directories:
+    - $HOME/.pub-cache
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  local_dir: build/web
+  on:
+    branch: main
