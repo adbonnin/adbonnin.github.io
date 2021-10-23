@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:showcase/widgets/app.dart';
 import 'package:showcase/widgets/page.dart';
 
 class Example1 extends StatelessWidget {
-  final AppPage page;
-  final List<AppPage> pages;
+  final Destination destination;
 
   const Example1({
     Key? key,
-    required this.page,
-    required this.pages,
+    required this.destination,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      page: page,
-      pages: pages,
-      body: const Center(
-        child: Text("Example 1"),
+      destination: destination,
+      body: Center(
+        child: Text(destination.title),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:showcase/widgets/app.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver();
 
@@ -8,24 +9,6 @@ bool isMobileLayout(BuildContext context) {
 }
 
 typedef NavigateTo = void Function(BuildContext context, String route);
-
-typedef AppPageBuilder = Widget Function(BuildContext context, AppPage page, List<AppPage> pages);
-
-class AppPage {
-  final String title;
-  final String route;
-  final Widget icon;
-  final Widget selectedIcon;
-  final AppPageBuilder builder;
-
-  AppPage({
-    required this.title,
-    required this.route,
-    required this.icon,
-    required this.selectedIcon,
-    required this.builder,
-  });
-}
 
 class AppPageTransitionsBuilder extends PageTransitionsBuilder {
   final PageTransitionsBuilder? defaultBuilder;
@@ -42,15 +25,13 @@ class AppPageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 class AppScaffold extends StatelessWidget {
-  final AppPage page;
-  final List<AppPage> pages;
+  final Destination destination;
   final Widget body;
   final Widget? floatingActionButton;
 
   const AppScaffold({
     Key? key,
-    required this.page,
-    required this.pages,
+    required this.destination,
     required this.body,
     this.floatingActionButton,
   }) : super(key: key);
@@ -64,14 +45,13 @@ class AppScaffold extends StatelessWidget {
 
   Widget buildMobile() {
     return Scaffold(
+      primary: true,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: Text(page.title),
+        title: Text(destination.title),
       ),
       body: body,
       floatingActionButton: floatingActionButton,
-      drawer: AppDrawer(
-        pages: pages,
+      drawer: const AppDrawer(
         alwaysVisible: false,
       ),
     );
@@ -80,12 +60,13 @@ class AppScaffold extends StatelessWidget {
   Widget buildDesktop() {
     return Scaffold(
       appBar: AppBar(
-        title: Text(page.title),
+        primary: true,
+        automaticallyImplyLeading: false,
+        title: Text(destination.title),
       ),
       body: Row(
         children: [
-          AppDrawer(
-            pages: pages,
+          const AppDrawer(
             alwaysVisible: true,
           ),
           const VerticalDivider(
@@ -105,12 +86,10 @@ class AppScaffold extends StatelessWidget {
 }
 
 class AppDrawer extends StatefulWidget {
-  final List<AppPage> pages;
   final bool alwaysVisible;
 
   const AppDrawer({
     Key? key,
-    required this.pages,
     required this.alwaysVisible,
   }) : super(key: key);
 
@@ -152,6 +131,7 @@ class _AppDrawerState extends State<AppDrawer> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    final app = App.of(context);
     return Drawer(
       child: Row(
         children: [
@@ -159,18 +139,23 @@ class _AppDrawerState extends State<AppDrawer> with RouteAware {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                ...widget.pages.map(
-                  (page) => AppDrawerButton.fromPage(
-                    page: page,
-                    navigateTo: _navigateTo,
-                    selectedRoute: _selectedRoute,
-                  ),
-                ),
+                for (Destination destination in app.destinations) //
+                  _buildDestinationListTile(context, destination)
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDestinationListTile(BuildContext context, Destination destination) {
+    final selected = _selectedRoute == destination.route;
+    return ListTile(
+      leading: selected ? destination.selectedIcon : destination.icon,
+      title: Text(destination.title),
+      onTap: () => _navigateTo(context, destination.route),
+      selected: selected,
     );
   }
 
@@ -180,46 +165,5 @@ class _AppDrawerState extends State<AppDrawer> with RouteAware {
     }
 
     await Navigator.pushNamed(context, route);
-  }
-}
-
-class AppDrawerButton extends StatelessWidget {
-  final Widget icon;
-  final Widget selectedIcon;
-  final Widget title;
-  final String route;
-  final NavigateTo navigateTo;
-  final String? selectedRoute;
-
-  const AppDrawerButton({
-    Key? key,
-    required this.icon,
-    required this.selectedIcon,
-    required this.title,
-    required this.route,
-    required this.navigateTo,
-    required this.selectedRoute,
-  }) : super(key: key);
-
-  AppDrawerButton.fromPage({
-    Key? key,
-    required AppPage page,
-    required this.navigateTo,
-    required this.selectedRoute,
-  })  : icon = page.icon,
-        selectedIcon = page.selectedIcon,
-        title = Text(page.title),
-        route = page.route,
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final selected = selectedRoute == route;
-    return ListTile(
-      leading: selected ? selectedIcon : icon,
-      title: title,
-      onTap: () => navigateTo(context, route),
-      selected: selected,
-    );
   }
 }
