@@ -3,10 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:showcase/widgets/app.dart';
 import 'package:showcase/widgets/app_scaffold.dart';
 
-class Example1 extends StatelessWidget {
+class Example2 extends StatelessWidget {
   final Destination destination;
 
-  const Example1({
+  const Example2({
     Key? key,
     required this.destination,
   }) : super(key: key);

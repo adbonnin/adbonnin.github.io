@@ -2,13 +2,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:showcase/pages/example1.dart';
 import 'package:showcase/widgets/app.dart';
-import 'package:showcase/widgets/page.dart';
+import 'package:showcase/widgets/app_scaffold.dart';
+import 'package:showcase/widgets/selected_route.dart';
 
 void main() {
   final destinations = [
     Destination(
-      title: 'Example1',
+      title: 'Example 1',
       route: '/example1',
+      icon: const Icon(Icons.add),
+      selectedIcon: const Icon(Icons.add),
+      builder: (_, destination) => Example1(destination: destination),
+    ),
+    Destination(
+      title: 'Example 2',
+      route: '/example2',
       icon: const Icon(Icons.add),
       selectedIcon: const Icon(Icons.add),
       builder: (_, destination) => Example1(destination: destination),
@@ -52,6 +60,7 @@ class Showcase extends StatelessWidget {
         ),
       ),
       initialRoute: app.destinations[0].route,
+      navigatorObservers: [SelectedRouteObserver()],
       routes: routes,
     );
   }

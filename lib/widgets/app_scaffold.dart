@@ -1,14 +1,12 @@
+import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:showcase/widgets/app.dart';
-
-final RouteObserver<PageRoute> routeObserver = RouteObserver();
+import 'package:showcase/widgets/selected_route.dart';
 
 bool isMobileLayout(BuildContext context) {
-  return MediaQuery.of(context).size.width < 768;
+  return getWindowType(context) < AdaptiveWindowType.medium;
 }
-
-typedef NavigateTo = void Function(BuildContext context, String route);
 
 class AppPageTransitionsBuilder extends PageTransitionsBuilder {
   final PageTransitionsBuilder? defaultBuilder;
@@ -51,8 +49,11 @@ class AppScaffold extends StatelessWidget {
       ),
       body: body,
       floatingActionButton: floatingActionButton,
-      drawer: const AppDrawer(
-        alwaysVisible: false,
+      drawer: SelectedRoute(
+        builder: (context, route) => AppDrawer(
+          alwaysVisible: false,
+          selectedRoute: route,
+        ),
       ),
     );
   }
@@ -66,8 +67,11 @@ class AppScaffold extends StatelessWidget {
       ),
       body: Row(
         children: [
-          const AppDrawer(
-            alwaysVisible: true,
+          SelectedRoute(
+            builder: (context, route) => AppDrawer(
+              alwaysVisible: true,
+              selectedRoute: route,
+            ),
           ),
           const VerticalDivider(
             width: 1,
@@ -85,49 +89,15 @@ class AppScaffold extends StatelessWidget {
   }
 }
 
-class AppDrawer extends StatefulWidget {
+class AppDrawer extends StatelessWidget {
   final bool alwaysVisible;
+  final String? selectedRoute;
 
   const AppDrawer({
     Key? key,
     required this.alwaysVisible,
+    required this.selectedRoute,
   }) : super(key: key);
-
-  @override
-  _AppDrawerState createState() => _AppDrawerState();
-}
-
-class _AppDrawerState extends State<AppDrawer> with RouteAware {
-  late String? _selectedRoute;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    routeObserver.subscribe(this, ModalRoute.of(context) as PageRoute);
-  }
-
-  @override
-  void dispose() {
-    routeObserver.unsubscribe(this);
-    super.dispose();
-  }
-
-  @override
-  void didPush() {
-    _updateSelectedRoute();
-  }
-
-  @override
-  void didPop() {
-    _updateSelectedRoute();
-  }
-
-  void _updateSelectedRoute() {
-    final route = ModalRoute.of(context)?.settings.name;
-    if (route != null) {
-      setState(() => _selectedRoute = route);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +120,7 @@ class _AppDrawerState extends State<AppDrawer> with RouteAware {
   }
 
   Widget _buildDestinationListTile(BuildContext context, Destination destination) {
-    final selected = _selectedRoute == destination.route;
+    final selected = selectedRoute == destination.route;
     return ListTile(
       leading: selected ? destination.selectedIcon : destination.icon,
       title: Text(destination.title),
@@ -160,7 +130,7 @@ class _AppDrawerState extends State<AppDrawer> with RouteAware {
   }
 
   Future<void> _navigateTo(BuildContext context, String route) async {
-    if (widget.alwaysVisible) {
+    if (alwaysVisible) {
       Navigator.pop(context);
     }
 
