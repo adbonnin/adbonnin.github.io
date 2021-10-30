@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:showcase/widgets/app.dart';
 import 'package:showcase/widgets/selected_route.dart';
+import 'package:showcase/widgets/title_bar.dart';
 
 bool isMobileLayout(BuildContext context) {
   return getWindowType(context) < AdaptiveWindowType.medium;
@@ -36,9 +37,11 @@ class AppScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final app = App.of(context);
+
     return isMobileLayout(context) //
         ? buildMobile()
-        : buildDesktop();
+        : buildDesktop(app);
   }
 
   Widget buildMobile() {
@@ -58,33 +61,34 @@ class AppScaffold extends StatelessWidget {
     );
   }
 
-  Widget buildDesktop() {
-    return Scaffold(
-      appBar: AppBar(
-        primary: true,
-        automaticallyImplyLeading: false,
-        title: Text(destination.title),
-      ),
-      body: Row(
-        children: [
-          SelectedRoute(
-            builder: (context, route) => AppDrawer(
-              alwaysVisible: true,
-              selectedRoute: route,
+  Widget buildDesktop(App app) {
+    return Row(
+      children: [
+        SelectedRoute(
+          builder: (context, route) => AppDrawer(
+            alwaysVisible: true,
+            selectedRoute: route,
+            header: TitleBar(
+              title: app.title,
             ),
           ),
-          const VerticalDivider(
-            width: 1,
-            thickness: 1,
-          ),
-          Expanded(
-            child: Scaffold(
-              body: body,
-              floatingActionButton: floatingActionButton,
+        ),
+        const VerticalDivider(
+          width: 1,
+          thickness: 1,
+        ),
+        Expanded(
+          child: Scaffold(
+            appBar: AppBar(
+              primary: true,
+              automaticallyImplyLeading: false,
+              title: Text(destination.title),
             ),
+            body: body,
+            floatingActionButton: floatingActionButton,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -92,9 +96,11 @@ class AppScaffold extends StatelessWidget {
 class AppDrawer extends StatelessWidget {
   final bool alwaysVisible;
   final String? selectedRoute;
+  final Widget? header;
 
   const AppDrawer({
     Key? key,
+    this.header,
     required this.alwaysVisible,
     required this.selectedRoute,
   }) : super(key: key);
@@ -103,8 +109,9 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final app = App.of(context);
     return Drawer(
-      child: Row(
+      child: Column(
         children: [
+          if (header != null) header!,
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
