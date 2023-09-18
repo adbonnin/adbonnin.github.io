@@ -1,0 +1,30 @@
+name: Flutter Web
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    name: Build Web
+    env:
+      commit_secret: ${{secrets.COMMIT_SECRET}}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '3.13.1'
+      - run: flutter config --enable-web
+      - run: flutter pub get
+      - run: flutter build web --release
+      - run: |
+          cd build/web
+          git init
+          git config --global user.email 6490221+adbonnin@users.noreply.github.com
+          git config --global user.name "Adrien Bonnin"
+          git status
+          git remote add origin https://${{env.commit_secret}}@github.com/adbonnin/adbonnin.github.io.git
+          git checkout -B gh-pages
+          git add --all
+          git commit -m ":rocket: Déploiement sur la GitHub pages"
+          git push origin gh-pages -f
