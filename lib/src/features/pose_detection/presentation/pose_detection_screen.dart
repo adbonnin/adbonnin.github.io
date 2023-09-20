@@ -2,21 +2,24 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:portfolio/src/features/pose_detection/application/pose_detection_service.dart';
 import 'package:portfolio/src/utils/camera.dart';
 import 'package:portfolio/src/widgets/camera_view.dart';
 
 // https://medium.com/@inzimamb5/pose-detector-using-google-ml-kit-in-flutter-getx-ea3bf9bb62ff
 // https://pub.dev/packages/google_mlkit_commons#usage
-class PoseDetectionScreen extends StatefulWidget {
+class PoseDetectionScreen extends ConsumerStatefulWidget {
   const PoseDetectionScreen({super.key});
 
   @override
-  State<PoseDetectionScreen> createState() => _PoseDetectionScreenState();
+  ConsumerState<PoseDetectionScreen> createState() => _PoseDetectionScreenState();
 }
 
-class _PoseDetectionScreenState extends State<PoseDetectionScreen> {
+class _PoseDetectionScreenState extends ConsumerState<PoseDetectionScreen> {
   var isProcessing = false;
+  CustomPainter? posePainter;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,7 @@ class _PoseDetectionScreenState extends State<PoseDetectionScreen> {
     );
   }
 
-  void _processImage(CameraDescription camera, CameraController controller, CameraImage image) {
+  Future<void> _processImage(CameraDescription camera, CameraController controller, CameraImage image) async {
     if (isProcessing) {
       return;
     }
@@ -39,8 +42,10 @@ class _PoseDetectionScreenState extends State<PoseDetectionScreen> {
         return;
       }
 
-      final poseDetector = PoseDetector(options: PoseDetectorOptions());
-      poseDetector.processImage(inputImage);
+      final poses = await ref.read(poseDetectionServiceProvider).processImage(inputImage);
+
+      final metadata = inputImage.metadata;
+      posePainter = PosePainter(poses, metadata.size, metadata.rotation);
     } //
     finally {
       isProcessing = false;
