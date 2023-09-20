@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 const _defaultZoomLevel = 1.0;
@@ -11,10 +12,14 @@ class CameraView extends StatefulWidget {
     super.key,
     this.onImageAvailable,
     this.initialLensDirection = CameraLensDirection.back,
+    this.resolutionPreset = ResolutionPreset.high,
+    required this.imageFormatGroup,
   });
 
-  final onLatestImageAvailable? onImageAvailable;
+  final Function(CameraDescription camera, CameraController controller, CameraImage image)? onImageAvailable;
   final CameraLensDirection initialLensDirection;
+  final ResolutionPreset resolutionPreset;
+  final ImageFormatGroup imageFormatGroup;
 
   @override
   State<CameraView> createState() => _CameraViewState();
@@ -41,13 +46,9 @@ class _CameraViewState extends State<CameraView> {
   Future<void> _asyncInitState() async {
     availableCameras().then((cameras) {
       _cameras = cameras;
+      final selectedCamera = _selectCamera(_cameras, widget.initialLensDirection);
 
-      if (cameras.isNotEmpty) {
-        final selectedCamera = _cameras.firstWhere(
-          (camera) => camera.lensDirection == widget.initialLensDirection,
-          orElse: () => cameras.first,
-        );
-
+      if (selectedCamera != null) {
         _updateSelectedCamera(selectedCamera);
       }
     });
@@ -67,6 +68,22 @@ class _CameraViewState extends State<CameraView> {
 
       await controller.dispose();
     }
+  }
+
+  CameraDescription? _selectCamera(List<CameraDescription> cameras, CameraLensDirection lensDirection) {
+    if (cameras.isEmpty) {
+      return null;
+    }
+
+    var selectedCamera = cameras.firstWhereOrNull((c) {
+      return c.lensDirection == lensDirection && c.sensorOrientation == 90;
+    });
+
+    selectedCamera ??= cameras.firstWhereOrNull((c) {
+      return c.lensDirection == lensDirection;
+    });
+
+    return selectedCamera ?? cameras.first;
   }
 
   @override
@@ -99,8 +116,9 @@ class _CameraViewState extends State<CameraView> {
 
     final cameraController = CameraController(
       camera,
-      ResolutionPreset.high,
+      widget.resolutionPreset,
       enableAudio: false,
+      imageFormatGroup: widget.imageFormatGroup,
     );
 
     _controller = cameraController;
@@ -117,7 +135,7 @@ class _CameraViewState extends State<CameraView> {
 
     if (widget.onImageAvailable != null) {
       try {
-        await cameraController.startImageStream(widget.onImageAvailable!);
+        await cameraController.startImageStream((image) => widget.onImageAvailable!(camera, cameraController, image));
       } //
       catch (e) {
         debugPrint('Error: $e');
