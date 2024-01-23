@@ -105,7 +105,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
           children: [
             FilledButton.icon(
               onPressed: cannotExportThumbnails ? null : () => _exportThumbnails(imageControllers),
-              icon: LoadingIcon(Icons.download, loading: _exportingThumbnails),
+              icon: LoadingIcon(Icons.collections, loading: _exportingThumbnails),
               label: Text(_exportingThumbnails //
                   ? context.loc.anime_tierlist_exportingThumbnails
                   : context.loc.anime_tierlist_exportThumbnails),
@@ -165,7 +165,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       final bytes = await _buildZip(imageControllers);
 
       await FileSaver.instance.saveFile(
-        name: 'thumbnails',
+        name: 'thumbnails-$_year-$_season',
         bytes: bytes,
         ext: '.zip',
         mimeType: MimeType.zip,
