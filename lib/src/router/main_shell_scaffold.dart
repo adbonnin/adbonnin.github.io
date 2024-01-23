@@ -23,7 +23,7 @@ class MainShellScaffold extends StatelessWidget {
         NavigationDestination(
           icon: const Icon(Icons.collections_outlined),
           selectedIcon: const Icon(Icons.collections),
-          label: context.loc.anime_tierlist_title,
+          label: context.loc.anime_title,
         ),
         NavigationDestination(
           icon: const Icon(Icons.settings_outlined),

@@ -4,8 +4,10 @@
     "common_fall": "Fall",
     "common_winter": "Winter",
     "app_title": "Portfolio",
-    "anime_tierlist_title":"Anime TierList",
+    "anime_title":"Anime",
     "anime_tierlist_year": "Year",
     "anime_tierlist_season": "Season",
+    "anime_tierlist_exportThumbnails": "Export thumbnails",
+    "anime_tierlist_exportingThumbnails": "Exporting thumbnails",
     "settings_title":"Settings"
 }

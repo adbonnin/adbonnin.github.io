@@ -4,8 +4,10 @@
     "common_fall": "Automne",
     "common_winter": "Hiver",
     "app_title": "Portfolio",
-    "anime_tierlist_title":"Anime TierList",
+    "anime_title":"Anime",
     "anime_tierlist_year": "Année",
     "anime_tierlist_season": "Saison",
+    "anime_tierlist_exportThumbnails": "Exporter les miniatures",
+    "anime_tierlist_exportingThumbnails": "Exportation des miniatures",
     "settings_title":"Paramètres"
 }

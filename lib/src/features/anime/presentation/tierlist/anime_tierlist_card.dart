@@ -40,7 +40,7 @@ class AnimeTierListCard extends StatelessWidget {
               right: 0,
               child: Container(
                 color: const Color(0xE6292929),
-                padding: const EdgeInsets.fromLTRB(3, 2, 3, 1),
+                padding: const EdgeInsets.fromLTRB(4, 3, 4, 2),
                 child: AutoSizeText(
                   media.englishTitle ?? media.userPreferredTitle ?? '',
                   style: GoogleFonts.overpass(
@@ -49,7 +49,7 @@ class AnimeTierListCard extends StatelessWidget {
                   ),
                   minFontSize: 0,
                   maxFontSize: 9,
-                  maxLines: 5,
+                  maxLines: 6,
                   stepGranularity: 0.1,
                 ),
               ),
