@@ -165,7 +165,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       final bytes = await _buildZip(imageControllers);
 
       await FileSaver.instance.saveFile(
-        name: 'thumbnails.zip',
+        name: 'thumbnails',
         bytes: bytes,
         ext: '.zip',
         mimeType: MimeType.zip,
