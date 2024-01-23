@@ -20,42 +20,39 @@ class AnimeTierListCard extends StatelessWidget {
     return SizedBox(
       width: 80,
       height: 120,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(4.0),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: coverUrl == null
-                  ? Image.asset(Images.anilistCoverMediumDefault)
-                  : CachedNetworkImage(
-                      imageUrl: coverUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Image.asset(Images.anilistCoverMediumDefault),
-                      errorWidget: (_, __, ___) => Image.asset(Images.anilistCoverMediumDefault),
-                    ),
-            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              right: 0,
-              child: Container(
-                color: const Color(0xE6292929),
-                padding: const EdgeInsets.fromLTRB(4, 3, 4, 2),
-                child: AutoSizeText(
-                  media.englishTitle ?? media.userPreferredTitle ?? '',
-                  style: GoogleFonts.overpass(
-                    color: Colors.white,
-                    height: 0,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: coverUrl == null
+                ? Image.asset(Images.anilistCoverMediumDefault)
+                : CachedNetworkImage(
+                    imageUrl: coverUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Image.asset(Images.anilistCoverMediumDefault),
+                    errorWidget: (_, __, ___) => Image.asset(Images.anilistCoverMediumDefault),
                   ),
-                  minFontSize: 0,
-                  maxFontSize: 9,
-                  maxLines: 6,
-                  stepGranularity: 0.1,
+          ),
+          Positioned(
+            left: 0,
+            bottom: 0,
+            right: 0,
+            child: Container(
+              color: const Color(0xE6292929),
+              padding: const EdgeInsets.fromLTRB(4, 3, 4, 2),
+              child: AutoSizeText(
+                media.englishTitle ?? media.userPreferredTitle ?? '',
+                style: GoogleFonts.overpass(
+                  color: Colors.white,
+                  height: 0,
                 ),
+                minFontSize: 0,
+                maxFontSize: 9,
+                maxLines: 6,
+                stepGranularity: 0.1,
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }
