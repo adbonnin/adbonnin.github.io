@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:go_router/go_router.dart';
-import 'package:portfolio/src/l10n/app_localizations_context.dart';
+import 'package:portfolio/src/l10n/app_localizations.dart';
 
 class MainShellScaffold extends StatelessWidget {
   const MainShellScaffold({
@@ -21,9 +21,9 @@ class MainShellScaffold extends StatelessWidget {
       onSelectedIndexChange: _onSelectedIndexChange,
       destinations: [
         NavigationDestination(
-          icon: const Icon(Icons.home_outlined),
-          selectedIcon: const Icon(Icons.home),
-          label: context.loc.home_title,
+          icon: const Icon(Icons.collections_outlined),
+          selectedIcon: const Icon(Icons.collections),
+          label: context.loc.anime_tierlist_title,
         ),
         NavigationDestination(
           icon: const Icon(Icons.settings_outlined),

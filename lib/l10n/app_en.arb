@@ -1,5 +1,11 @@
 {
+    "common_spring": "Spring",
+    "common_summer": "Summer",
+    "common_fall": "Fall",
+    "common_winter": "Winter",
     "app_title": "Portfolio",
-    "home_title":"Home",
+    "anime_tierlist_title":"Anime TierList",
+    "anime_tierlist_year": "Year",
+    "anime_tierlist_season": "Season",
     "settings_title":"Settings"
 }

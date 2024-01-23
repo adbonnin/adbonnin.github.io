@@ -1,0 +1,36 @@
+query BrowseAnime(
+    $page: Int = 1
+    $format: [MediaFormat]
+    $season: MediaSeason
+    $seasonYear: Int
+    $year: String
+) {
+    Page(page: $page, perPage: 20) {
+        pageInfo {
+            total
+            perPage
+            currentPage
+            lastPage
+            hasNextPage
+        }
+        media(
+            season: $season
+            format_in: $format
+            seasonYear: $seasonYear
+            startDate_like: $year
+            isAdult: false
+            sort: [POPULARITY_DESC, SCORE_DESC]
+        ) {
+            id
+            title {
+                english
+                native
+                userPreferred
+            }
+            coverImage {
+                medium
+            }
+            format
+        }
+    }
+}

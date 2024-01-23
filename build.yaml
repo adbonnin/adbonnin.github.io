@@ -3,7 +3,12 @@ targets:
     builders:
       riverpod_generator:
         generate_for:
-          - lib/**/router.dart
+          - '**/application/**.dart'
+          - 'lib/src/router/router.dart'
       go_router_builder:
         generate_for:
-          - lib/**/router.dart
+          - 'lib/src/router/router.dart'
+      graphql_codegen:
+        options:
+          clients:
+            - graphql

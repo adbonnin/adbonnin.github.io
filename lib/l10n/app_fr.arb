@@ -1,5 +1,11 @@
 {
+    "common_spring": "Printemps",
+    "common_summer": "Ete",
+    "common_fall": "Automne",
+    "common_winter": "Hiver",
     "app_title": "Portfolio",
-    "home_title":"Acceuil",
+    "anime_tierlist_title":"Anime TierList",
+    "anime_tierlist_year": "Année",
+    "anime_tierlist_season": "Saison",
     "settings_title":"Paramètres"
 }

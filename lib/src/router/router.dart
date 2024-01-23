@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_screen.dart';
 import 'package:portfolio/src/router/main_shell_scaffold.dart';
 import 'package:portfolio/src/features/home/presentation/home_screen.dart';
 import 'package:portfolio/src/features/settings/presentation/settings_screen.dart';
@@ -13,7 +14,7 @@ final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>();
 GoRouter router(RouterRef ref) {
   return GoRouter(
     routes: $appRoutes,
-    initialLocation: const HomeRouteData().location,
+    initialLocation: const AnimeTierListRouteData().location,
     debugLogDiagnostics: true,
   );
 }
@@ -22,10 +23,10 @@ GoRouter router(RouterRef ref) {
 // https://github.com/flutter/packages/blob/main/packages/go_router_builder/example/lib/stateful_shell_route_initial_location_example.dart
 @TypedStatefulShellRoute<MainShellRouteData>(
   branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
-    TypedStatefulShellBranch<HomeBranchData>(
+    TypedStatefulShellBranch<AnimeTierListBranchData>(
       routes: [
-        TypedGoRoute<HomeRouteData>(
-          path: '/home',
+        TypedGoRoute<AnimeTierListRouteData>(
+          path: '/anime-tierlist',
         ),
       ],
     ),
@@ -49,8 +50,8 @@ class MainShellRouteData extends StatefulShellRouteData {
   }
 }
 
-class HomeBranchData extends StatefulShellBranchData {
-  const HomeBranchData();
+class AnimeTierListBranchData extends StatefulShellBranchData {
+  const AnimeTierListBranchData();
 
   static final GlobalKey<NavigatorState> $navigatorKey = _homeNavigatorKey;
 }
@@ -59,12 +60,12 @@ class SettingsBranchData extends StatefulShellBranchData {
   const SettingsBranchData();
 }
 
-class HomeRouteData extends GoRouteData {
-  const HomeRouteData();
+class AnimeTierListRouteData extends GoRouteData {
+  const AnimeTierListRouteData();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const HomeScreen();
+    return const AnimeTierListScreen();
   }
 }
 
