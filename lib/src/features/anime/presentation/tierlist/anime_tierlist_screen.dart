@@ -7,11 +7,11 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_scroll_shadow/flutter_scroll_shadow.dart';
-import 'package:intl/intl.dart';
 import 'package:portfolio/src/features/anilist/application/anilist_service.dart';
 import 'package:portfolio/src/features/anime/domain/media.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_card.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
+import 'package:portfolio/src/utils/number.dart';
 import 'package:portfolio/src/utils/season.dart';
 import 'package:portfolio/src/widgets/async_value_widget.dart';
 import 'package:portfolio/src/widgets/info_label.dart';
@@ -104,7 +104,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
         Row(
           children: [
             FilledButton.icon(
-              onPressed: cannotExportThumbnails ? null : () => _exportThumbnails(imageControllers),
+              onPressed: cannotExportThumbnails ? null : () => _exportThumbnails(context, imageControllers),
               icon: LoadingIcon(Icons.collections, loading: _exportingThumbnails),
               label: Text(_exportingThumbnails //
                   ? context.loc.anime_tierlist_exportingThumbnails
@@ -156,16 +156,20 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     );
   }
 
-  Future<void> _exportThumbnails(List<WidgetsToImageController> imageControllers) async {
+  Future<void> _exportThumbnails(
+    BuildContext context,
+    List<WidgetsToImageController> imageControllers,
+  ) async {
     setState(() {
       _exportingThumbnails = true;
     });
 
     try {
+      final seasonLabel = context.loc.season(_season).toLowerCase();
       final bytes = await _buildZip(imageControllers);
 
       await FileSaver.instance.saveFile(
-        name: 'thumbnails-$_year-$_season',
+        name: 'tierlist-$_year-$seasonLabel',
         bytes: bytes,
         ext: '.zip',
         mimeType: MimeType.zip,
@@ -180,7 +184,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
 
   Future<Uint8List> _buildZip(List<WidgetsToImageController> imageControllers) async {
     final archive = Archive();
-    final numberFormat = NumberFormat("000");
+    final numberFormat = Numbers.numberFormatFromDigits(imageControllers.length);
 
     for (var i = 0; i < imageControllers.length; i++) {
       final imageController = imageControllers[i];
@@ -191,7 +195,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       }
 
       final file = ArchiveFile(
-        '${numberFormat.format(i)}.png',
+        '${numberFormat.format(i + 1)}.png',
         image.lengthInBytes,
         image,
       );
