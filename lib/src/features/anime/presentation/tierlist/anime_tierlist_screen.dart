@@ -18,7 +18,8 @@ import 'package:portfolio/src/utils/season.dart';
 import 'package:portfolio/src/widgets/async_value_widget.dart';
 import 'package:portfolio/src/widgets/info_label.dart';
 import 'package:portfolio/src/widgets/loading_icon.dart';
-import 'package:portfolio/src/widgets/widgets_to_image.dart';
+import 'package:portfolio/src/widgets/widget_to_image.dart';
+import 'package:portfolio/src/widgets/widget_to_image_wrap.dart';
 import 'package:portfolio/styles.dart';
 
 class AnimeTierListScreen extends ConsumerStatefulWidget {
@@ -29,6 +30,8 @@ class AnimeTierListScreen extends ConsumerStatefulWidget {
 }
 
 class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
+  final _wrapKey = GlobalKey<WidgetToImageWrapState>();
+
   var _exportingThumbnails = false;
 
   var _year = DateTime.now().year;
@@ -45,8 +48,6 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     final asyncAnime = ref.watch(browseAnimeProvider(season: _season, year: _year));
     final anime = asyncAnime.valueOrNull;
     final cannotExportThumbnails = anime == null || asyncAnime.isLoading || _exportingThumbnails;
-
-    final imageControllers = List.generate(anime?.length ?? 0, (_) => WidgetsToImageController());
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,13 +94,12 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
             asyncAnime,
             data: (anime) => ScrollShadow(
               child: SingleChildScrollView(
-                child: Wrap(
+                child: WidgetToImageWrap(
+                  key: _wrapKey,
+                  itemCount: anime.length,
+                  itemBuilder: (_, index) => _buildItem(anime[index]),
                   spacing: Insets.p6,
                   runSpacing: Insets.p6,
-                  children: anime //
-                      .map(_mapCustom)
-                      .mapIndexed((index, element) => _buildItem(element, imageControllers[index]))
-                      .toList(),
                 ),
               ),
             ),
@@ -109,7 +109,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
         Row(
           children: [
             FilledButton.icon(
-              onPressed: cannotExportThumbnails ? null : () => _exportThumbnails(context, imageControllers),
+              onPressed: cannotExportThumbnails ? null : () => _exportThumbnails(context),
               icon: LoadingIcon(Icons.collections, loading: _exportingThumbnails),
               label: Text(_exportingThumbnails //
                   ? context.loc.anime_tierlist_exportingThumbnails
@@ -151,7 +151,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     );
   }
 
-  Media _mapCustom(Media media) {
+  Widget _buildItem(Media media) {
     final custom = _customAnime[media.id];
 
     if (custom != null) {
@@ -161,19 +161,9 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       );
     }
 
-    return media;
-  }
-
-  Widget _buildItem(
-    Media media,
-    WidgetsToImageController imageController,
-  ) {
-    return WidgetsToImage(
-      controller: imageController,
-      child: AnimeTierListCard(
-        media,
-        onTap: () => _onCardTap(media),
-      ),
+    return AnimeTierListCard(
+      media,
+      onTap: () => _onCardTap(media),
     );
   }
 
@@ -197,10 +187,13 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     });
   }
 
-  Future<void> _exportThumbnails(
-    BuildContext context,
-    List<WidgetsToImageController> imageControllers,
-  ) async {
+  Future<void> _exportThumbnails(BuildContext context) async {
+    final imageControllers = _wrapKey.currentState?.imageControllers;
+
+    if (imageControllers == null) {
+      return;
+    }
+
     setState(() {
       _exportingThumbnails = true;
     });
@@ -241,7 +234,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     }
   }
 
-  Future<Uint8List> _buildZip(List<WidgetsToImageController> imageControllers) async {
+  Future<Uint8List> _buildZip(List<WidgetToImageController> imageControllers) async {
     final archive = Archive();
     final numberFormat = Numbers.numberFormatFromDigits(imageControllers.length);
 

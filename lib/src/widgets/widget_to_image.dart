@@ -1,17 +1,18 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-class WidgetsToImage extends StatelessWidget {
-  const WidgetsToImage({
+class WidgetToImage extends StatelessWidget {
+  const WidgetToImage({
     super.key,
     required this.controller,
     required this.child,
   });
 
-  final WidgetsToImageController controller;
+  final WidgetToImageController controller;
   final Widget? child;
 
   @override
@@ -23,11 +24,12 @@ class WidgetsToImage extends StatelessWidget {
   }
 }
 
-class WidgetsToImageController {
+class WidgetToImageController {
   final containerKey = GlobalKey();
 
   Future<Uint8List?> capture() async {
-    final boundary = containerKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+    final renderObject = containerKey.currentContext?.findRenderObject();
+    final boundary = renderObject as RenderRepaintBoundary?;
 
     if (boundary == null) {
       return null;
