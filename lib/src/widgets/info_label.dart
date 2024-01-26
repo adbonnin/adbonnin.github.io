@@ -23,7 +23,7 @@ class InfoLabel extends StatelessWidget {
           labelText,
           style: textTheme.labelLarge,
         ),
-        Gaps.p6,
+        Gaps.p4,
         child,
       ],
     );

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 class Insets {
   static const p1 = 1.0;
   static const p2 = 2.0;
+  static const p4 = 4.0;
   static const p6 = 6.0;
   static const p8 = 8.0;
   static const p12 = 12.0;
@@ -16,6 +17,7 @@ class Insets {
 
 class Gaps {
   static const p1 = Gap(Insets.p1);
+  static const p4 = Gap(Insets.p4);
   static const p2 = Gap(Insets.p2);
   static const p6 = Gap(Insets.p6);
   static const p8 = Gap(Insets.p8);

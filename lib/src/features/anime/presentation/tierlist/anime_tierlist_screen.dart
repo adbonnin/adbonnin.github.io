@@ -1,15 +1,16 @@
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_scroll_shadow/flutter_scroll_shadow.dart';
 import 'package:portfolio/src/features/anilist/application/anilist_service.dart';
 import 'package:portfolio/src/features/anime/domain/media.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_card.dart';
+import 'package:portfolio/src/features/anime/presentation/tierlist_edit/anime_tierlist_edit_dialog.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
 import 'package:portfolio/src/utils/number.dart';
 import 'package:portfolio/src/utils/season.dart';
@@ -31,6 +32,8 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
 
   var _year = DateTime.now().year;
   var _season = DateTime.now().season;
+
+  var _customAnime = <int, Media>{};
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +96,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
                   spacing: Insets.p6,
                   runSpacing: Insets.p6,
                   children: anime //
+                      .map(_mapCustom)
                       .mapIndexed((index, element) => _buildItem(element, imageControllers[index]))
                       .toList(),
                 ),
@@ -146,14 +150,50 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     );
   }
 
+  Media _mapCustom(Media media) {
+    final custom = _customAnime[media.id];
+
+    if (custom != null) {
+      media = media.copyWith(
+        customTitle: custom.customTitle,
+        userSelectedTitle: custom.userSelectedTitle,
+      );
+    }
+
+    return media;
+  }
+
   Widget _buildItem(
     Media media,
     WidgetsToImageController imageController,
   ) {
     return WidgetsToImage(
       controller: imageController,
-      child: AnimeTierListCard(media),
+      child: AnimeTierListCard(
+        media,
+        onTap: () => _onCardTap(media),
+      ),
     );
+  }
+
+  Future<void> _onCardTap(Media anime) async {
+    final updateAnime = await showAnimeTierListEditDialog(
+      context: context,
+      anime: anime,
+    );
+
+    if (updateAnime == null) {
+      return;
+    }
+
+    final updatedCustomAnime = {
+      ..._customAnime,
+      anime.id: updateAnime,
+    };
+
+    setState(() {
+      _customAnime = updatedCustomAnime;
+    });
   }
 
   Future<void> _exportThumbnails(

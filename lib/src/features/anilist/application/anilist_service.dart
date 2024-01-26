@@ -51,7 +51,11 @@ class AnilistService {
       hasNextPage = (page?.pageInfo?.hasNextPage ?? false) || media.isNotEmpty;
     }
 
-    return pages.flatten().map((e) => e.toMedia()).toList();
+    return pages //
+        .flatten()
+        .map((m) => m.toMedia())
+        .whereNotNull()
+        .toList();
   }
 }
 
@@ -67,13 +71,20 @@ Future<List<Media>> browseAnime(
 }
 
 extension _MediaExtension on Query$BrowseAnime$Page$media {
-  Media toMedia() {
+  Media? toMedia() {
+    final mediaFormat = format?.toMediaFormat();
+
+    if (mediaFormat == null) {
+      return null;
+    }
+
     return Media(
-      englishTitle: title?.english,
-      nativeTitle: title?.native,
-      userPreferredTitle: title?.userPreferred,
+      id: id,
+      englishTitle: title?.english ?? '',
+      nativeTitle: title?.native ?? '',
+      userPreferredTitle: title?.userPreferred ?? '',
       coverImageMedium: coverImage?.medium,
-      format: format?.toMediaFormat(),
+      format: mediaFormat,
     );
   }
 }
