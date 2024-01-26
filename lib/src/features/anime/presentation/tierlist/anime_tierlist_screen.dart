@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:archive/archive.dart';
@@ -206,14 +207,32 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
 
     try {
       final seasonLabel = context.loc.season(_season).toLowerCase();
-      final bytes = await _buildZip(imageControllers);
 
-      await FileSaver.instance.saveFile(
-        name: 'tierlist-$_year-$seasonLabel',
-        bytes: bytes,
-        ext: '.zip',
-        mimeType: MimeType.zip,
-      );
+      final name = 'tierlist-$_year-$seasonLabel';
+      final bytes = await _buildZip(imageControllers);
+      const ext = '.zip';
+      const mimeType = MimeType.zip;
+
+      if (kIsWeb) {
+        await FileSaver.instance.saveFile(
+          name: name,
+          bytes: bytes,
+          ext: ext,
+          mimeType: mimeType,
+        );
+      } //
+      else {
+        final filePath = await FileSaver.instance.saveAs(
+          name: name,
+          bytes: bytes,
+          ext: ext,
+          mimeType: mimeType,
+        );
+
+        if (filePath != null) {
+          await File(filePath).writeAsBytes(bytes);
+        }
+      }
     } //
     finally {
       setState(() {
