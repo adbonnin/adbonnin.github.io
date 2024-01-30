@@ -1,5 +1,5 @@
-class Media {
-  Media({
+class Anime {
+  const Anime({
     required this.id,
     this.englishTitle = '',
     this.nativeTitle = '',
@@ -17,7 +17,7 @@ class Media {
   final String customTitle;
   final MediaTitle? userSelectedTitle;
   final String? coverImageMedium;
-  final MediaFormat format;
+  final AnimeFormat format;
 
   MediaTitle get selectedTitle {
     if (userSelectedTitle != null) {
@@ -48,7 +48,7 @@ class Media {
     };
   }
 
-  Media copyWith({
+  Anime copyWith({
     int? id,
     String? englishTitle,
     String? nativeTitle,
@@ -56,9 +56,9 @@ class Media {
     String? customTitle,
     MediaTitle? userSelectedTitle,
     String? coverImageMedium,
-    MediaFormat? format,
+    AnimeFormat? format,
   }) {
-    return Media(
+    return Anime(
       id: id ?? this.id,
       englishTitle: englishTitle ?? this.englishTitle,
       nativeTitle: nativeTitle ?? this.nativeTitle,
@@ -71,18 +71,11 @@ class Media {
   }
 }
 
-enum MediaFormat {
-  manga,
-  movie,
-  music,
-  novel,
-  ona,
-  oneShot,
-  ova,
-  special,
+enum AnimeFormat {
   tv,
   tvShort,
-  $unknown,
+  movie,
+  ovaOnaSpecial,
 }
 
 enum MediaTitle {
@@ -90,4 +83,26 @@ enum MediaTitle {
   native,
   userPreferred,
   custom,
+}
+
+extension AnimeIterableExtension on Iterable<Anime> {
+  Iterable<Anime> whereTv() {
+    return whereFormat(AnimeFormat.tv);
+  }
+
+  Iterable<Anime> whereTvShort() {
+    return whereFormat(AnimeFormat.tvShort);
+  }
+
+  Iterable<Anime> whereMovie() {
+    return whereFormat(AnimeFormat.movie);
+  }
+
+  Iterable<Anime> whereOvaOnaSpecial() {
+    return whereFormat(AnimeFormat.ovaOnaSpecial);
+  }
+
+  Iterable<Anime> whereFormat(AnimeFormat format) {
+    return where((a) => a.format == format);
+  }
 }

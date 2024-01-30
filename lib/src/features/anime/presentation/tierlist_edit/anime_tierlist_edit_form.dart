@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/src/features/anime/domain/media.dart';
+import 'package:portfolio/src/features/anime/domain/anime.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
 import 'package:portfolio/src/widgets/info_label.dart';
 import 'package:portfolio/styles.dart';
@@ -20,7 +20,7 @@ class AnimeTierListEditForm extends StatefulWidget {
     required this.anime,
   });
 
-  final Media anime;
+  final Anime anime;
 
   @override
   State<AnimeTierListEditForm> createState() => AnimeTierListEditFormState();

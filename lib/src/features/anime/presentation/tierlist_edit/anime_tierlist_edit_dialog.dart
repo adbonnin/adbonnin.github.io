@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio/src/features/anime/domain/media.dart';
+import 'package:portfolio/src/features/anime/domain/anime.dart';
+import 'package:portfolio/src/features/anime/domain/anime_preference.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist_edit/anime_tierlist_edit_form.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
 
-Future<Media?> showAnimeTierListEditDialog({
+Future<AnimePreference?> showAnimeTierListEditDialog({
   required BuildContext context,
-  required Media anime,
+  required Anime anime,
   bool barrierDismissible = true,
   Color? barrierColor,
   String? barrierLabel,
@@ -13,7 +14,7 @@ Future<Media?> showAnimeTierListEditDialog({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
 }) {
-  return showDialog<Media>(
+  return showDialog<AnimePreference>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor,
@@ -33,7 +34,7 @@ class AnimeTierListEditDialog extends StatefulWidget {
     required this.anime,
   });
 
-  final Media anime;
+  final Anime anime;
 
   @override
   State<AnimeTierListEditDialog> createState() => _AnimeTierListEditDialogState();
@@ -76,7 +77,7 @@ class _AnimeTierListEditDialogState extends State<AnimeTierListEditDialog> {
 
     final value = formState.value();
 
-    final updatedAnime = widget.anime.copyWith(
+    final updatedAnime = AnimePreference(
       userSelectedTitle: value.userSelectedTitle,
       customTitle: value.customTitle,
     );

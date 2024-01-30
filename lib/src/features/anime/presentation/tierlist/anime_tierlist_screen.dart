@@ -7,19 +7,19 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_scroll_shadow/flutter_scroll_shadow.dart';
-import 'package:portfolio/src/features/anilist/application/anilist_service.dart';
-import 'package:portfolio/src/features/anime/domain/media.dart';
-import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_card.dart';
+import 'package:portfolio/src/features/anime/application/anime_service.dart';
+import 'package:portfolio/src/features/anime/domain/anime.dart';
+import 'package:portfolio/src/features/anime/domain/anime_preference.dart';
+import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_group.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist_edit/anime_tierlist_edit_dialog.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
+import 'package:portfolio/src/utils/iterable_extensions.dart';
 import 'package:portfolio/src/utils/number.dart';
 import 'package:portfolio/src/utils/season.dart';
 import 'package:portfolio/src/widgets/async_value_widget.dart';
 import 'package:portfolio/src/widgets/info_label.dart';
 import 'package:portfolio/src/widgets/loading_icon.dart';
 import 'package:portfolio/src/widgets/widget_to_image.dart';
-import 'package:portfolio/src/widgets/widget_to_image_wrap.dart';
 import 'package:portfolio/styles.dart';
 
 class AnimeTierListScreen extends ConsumerStatefulWidget {
@@ -30,14 +30,18 @@ class AnimeTierListScreen extends ConsumerStatefulWidget {
 }
 
 class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
-  final _wrapKey = GlobalKey<WidgetToImageWrapState>();
+  final _tvKey = GlobalKey<AnimeTierListGroupState>();
+  final _tvShortKey = GlobalKey<AnimeTierListGroupState>();
+  final _leftoverKey = GlobalKey<AnimeTierListGroupState>();
+  final _movieKey = GlobalKey<AnimeTierListGroupState>();
+  final _ovaOnaSpecialKey = GlobalKey<AnimeTierListGroupState>();
 
   var _exportingThumbnails = false;
 
   var _year = DateTime.now().year;
   var _season = DateTime.now().season;
 
-  var _customAnime = <int, Media>{};
+  var _preferencesById = <int, AnimePreference>{};
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +49,8 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     final lastYear = DateTime.now().year + 1;
     final years = List<int>.generate(max(0, lastYear - firstYear), (index) => lastYear - index);
 
-    final asyncAnime = ref.watch(browseAnimeProvider(season: _season, year: _year));
-    final anime = asyncAnime.valueOrNull;
-    final cannotExportThumbnails = anime == null || asyncAnime.isLoading || _exportingThumbnails;
+    final asyncSeason = ref.watch(browseAnimeProvider(_year, _season));
+    final cannotExportThumbnails = !asyncSeason.hasValue || asyncSeason.isLoading || _exportingThumbnails;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -91,16 +94,50 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
         Gaps.p12,
         Expanded(
           child: AsyncValueWidget(
-            asyncAnime,
-            data: (anime) => ScrollShadow(
-              child: SingleChildScrollView(
-                child: WidgetToImageWrap(
-                  key: _wrapKey,
-                  itemCount: anime.length,
-                  itemBuilder: (_, index) => _buildItem(anime[index]),
-                  spacing: Insets.p6,
-                  runSpacing: Insets.p6,
-                ),
+            asyncSeason,
+            data: (season) => SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (season.tv.isNotEmpty)
+                    AnimeTierListGroup(
+                      key: _tvKey,
+                      groupText: context.loc.anime_tierlist_tv,
+                      anime: season.tv.map(_applyPreference).toList(),
+                      onItemTap: _onItemTap,
+                    ),
+                  if (season.tvShort.isNotEmpty)
+                    AnimeTierListGroup(
+                      key: _tvShortKey,
+                      groupText: context.loc.anime_tierlist_tvShort,
+                      anime: season.tvShort.map(_applyPreference).toList(),
+                      onItemTap: _onItemTap,
+                    ),
+                  if (season.leftovers.isNotEmpty)
+                    AnimeTierListGroup(
+                      key: _leftoverKey,
+                      groupText: context.loc.anime_tierlist_leftover,
+                      anime: season.leftovers.map(_applyPreference).toList(),
+                      onItemTap: _onItemTap,
+                    ),
+                  if (season.movie.isNotEmpty)
+                    AnimeTierListGroup(
+                      key: _movieKey,
+                      groupText: context.loc.anime_tierlist_movie,
+                      anime: season.movie.map(_applyPreference).toList(),
+                      onItemTap: _onItemTap,
+                    ),
+                  if (season.ovaOnaSpecial.isNotEmpty)
+                    AnimeTierListGroup(
+                      key: _ovaOnaSpecialKey,
+                      groupText: context.loc.anime_tierlist_ovaOnaSpecial,
+                      anime: season.ovaOnaSpecial.map(_applyPreference).toList(),
+                      onItemTap: _onItemTap,
+                    ),
+                ] //
+                    .intersperse((_, __) => Gaps.p18)
+                    .toList(),
               ),
             ),
           ),
@@ -151,49 +188,40 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     );
   }
 
-  Widget _buildItem(Media media) {
-    final custom = _customAnime[media.id];
-
-    if (custom != null) {
-      media = media.copyWith(
-        customTitle: custom.customTitle,
-        userSelectedTitle: custom.userSelectedTitle,
-      );
-    }
-
-    return AnimeTierListCard(
-      media,
-      onTap: () => _onCardTap(media),
-    );
-  }
-
-  Future<void> _onCardTap(Media anime) async {
-    final updateAnime = await showAnimeTierListEditDialog(
+  Future<void> _onItemTap(Anime anime) async {
+    final updatedPreference = await showAnimeTierListEditDialog(
       context: context,
       anime: anime,
     );
 
-    if (updateAnime == null) {
+    if (updatedPreference == null) {
       return;
     }
 
-    final updatedCustomAnime = {
-      ..._customAnime,
-      anime.id: updateAnime,
+    final updatedPreferencesById = {
+      ..._preferencesById,
+      anime.id: updatedPreference,
     };
 
     setState(() {
-      _customAnime = updatedCustomAnime;
+      _preferencesById = updatedPreferencesById;
     });
   }
 
-  Future<void> _exportThumbnails(BuildContext context) async {
-    final imageControllers = _wrapKey.currentState?.imageControllers;
+  Anime _applyPreference(Anime anime) {
+    final preference = _preferencesById[anime.id];
 
-    if (imageControllers == null) {
-      return;
+    if (preference != null) {
+      anime = anime.copyWith(
+        customTitle: preference.customTitle,
+        userSelectedTitle: preference.userSelectedTitle,
+      );
     }
 
+    return anime;
+  }
+
+  Future<void> _exportThumbnails(BuildContext context) async {
     setState(() {
       _exportingThumbnails = true;
     });
@@ -202,11 +230,14 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       final seasonLabel = context.loc.season(_season).toLowerCase();
 
       final name = 'tierlist-$_year-$seasonLabel';
-      final bytes = await _buildZip(imageControllers);
+      final bytes = await _buildZip();
       const ext = '.zip';
       const mimeType = MimeType.zip;
 
-      if (kIsWeb) {
+      if (bytes.isEmpty) {
+        return;
+      } //
+      else if (kIsWeb) {
         await FileSaver.instance.saveFile(
           name: name,
           bytes: bytes,
@@ -234,25 +265,33 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     }
   }
 
-  Future<Uint8List> _buildZip(List<WidgetToImageController> imageControllers) async {
+  Future<Uint8List> _buildZip() async {
     final archive = Archive();
-    final numberFormat = Numbers.numberFormatFromDigits(imageControllers.length);
 
-    for (var i = 0; i < imageControllers.length; i++) {
-      final imageController = imageControllers[i];
-      final image = await imageController.capture();
+    final keysByName = {
+      'tv': _tvKey,
+      'tv_short': _tvShortKey,
+      'leftover': _leftoverKey,
+      'movie': _movieKey,
+      'ova_ona_special': _ovaOnaSpecialKey,
+    };
 
-      if (image == null) {
-        continue;
-      }
+    final total = keysByName.values //
+        .map<int>((key) => key.currentState?.imageControllers.length ?? 0)
+        .sum;
 
-      final file = ArchiveFile(
-        '${numberFormat.format(i + 1)}.png',
-        image.lengthInBytes,
-        image,
-      );
+    var offset = 1;
 
-      archive.addFile(file);
+    for (final etr in keysByName.entries) {
+      final basename = etr.key;
+      final imageControllers = etr.value.currentState?.imageControllers ?? [];
+
+      await _addCapturesToArchive(archive, total, offset, basename, imageControllers);
+      offset += imageControllers.length;
+    }
+
+    if (archive.isEmpty) {
+      return Uint8List(0);
     }
 
     final outputStream = OutputStream(byteOrder: LITTLE_ENDIAN);
@@ -260,5 +299,38 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
 
     final bytes = encoder.encode(archive, output: outputStream)!;
     return Uint8List.fromList(bytes);
+  }
+
+  Future<void> _addCapturesToArchive(
+    Archive archive,
+    int total,
+    int offset,
+    String basename,
+    List<WidgetToImageController> controllers,
+  ) async {
+    if (controllers.isEmpty) {
+      return;
+    }
+
+    final numberFormat = Numbers.numberFormatFromDigits(controllers.length);
+
+    for (var i = 0; i < controllers.length; i++) {
+      final imageController = controllers[i];
+      final image = await imageController.capture();
+
+      if (image == null) {
+        continue;
+      }
+
+      final index = numberFormat.format(offset + i);
+
+      final file = ArchiveFile(
+        '$index-$basename.png',
+        image.lengthInBytes,
+        image,
+      );
+
+      archive.addFile(file);
+    }
   }
 }

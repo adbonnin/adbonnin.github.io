@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:graphql/client.dart';
 import 'package:portfolio/src/features/anilist/data/browse_anime.graphql.dart';
 import 'package:portfolio/src/features/anilist/data/schema.graphql.dart';
-import 'package:portfolio/src/features/anime/domain/media.dart';
 import 'package:portfolio/src/utils/iterable_extensions.dart';
 import 'package:portfolio/src/utils/season.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,11 +23,22 @@ class AnilistService {
 
   final GraphQLClient client;
 
-  Future<List<Media>> browseAnime(
+  Future<Iterable<Query$BrowseAnime$Page$media>> browseLeftovers({
+    required int year,
+    required Season season,
+  }) {
+    return browseAnime(
+      year: season.previousYear(year),
+      season: season.previous,
+      episodeGreeter: 16,
+    );
+  }
+
+  Future<Iterable<Query$BrowseAnime$Page$media>> browseAnime({
     int? year,
     Season? season,
-    List<MediaFormat>? formats,
-  ) async {
+    int? episodeGreeter,
+  }) async {
     final pages = <Iterable<Query$BrowseAnime$Page$media>>[];
     bool hasNextPage = true;
 
@@ -39,7 +49,7 @@ class AnilistService {
             page: pages.length + 1,
             seasonYear: year,
             season: season?.toEnum$MediaSeason(),
-            format: formats?.map((mf) => mf.toEnum$MediaFormat()).toList(),
+            episodeGreater: episodeGreeter,
           ),
         ),
       );
@@ -51,41 +61,7 @@ class AnilistService {
       hasNextPage = (page?.pageInfo?.hasNextPage ?? false) || media.isNotEmpty;
     }
 
-    return pages //
-        .flatten()
-        .map((m) => m.toMedia())
-        .whereNotNull()
-        .toList();
-  }
-}
-
-@riverpod
-Future<List<Media>> browseAnime(
-  BrowseAnimeRef ref, {
-  int? year,
-  Season? season,
-  List<MediaFormat>? formats,
-}) {
-  final service = ref.read(anilistServiceProvider);
-  return service.browseAnime(year, season, formats);
-}
-
-extension _MediaExtension on Query$BrowseAnime$Page$media {
-  Media? toMedia() {
-    final mediaFormat = format?.toMediaFormat();
-
-    if (mediaFormat == null) {
-      return null;
-    }
-
-    return Media(
-      id: id,
-      englishTitle: title?.english ?? '',
-      nativeTitle: title?.native ?? '',
-      userPreferredTitle: title?.userPreferred ?? '',
-      coverImageMedium: coverImage?.medium,
-      format: mediaFormat,
-    );
+    return pages.flatten();
   }
 }
 
@@ -96,42 +72,6 @@ extension _SeasonExtension on Season {
       Season.spring => Enum$MediaSeason.SPRING,
       Season.summer => Enum$MediaSeason.SUMMER,
       Season.fall => Enum$MediaSeason.FALL,
-    };
-  }
-}
-
-extension _MediaFormatExtension on MediaFormat {
-  Enum$MediaFormat toEnum$MediaFormat() {
-    return switch (this) {
-      MediaFormat.manga => Enum$MediaFormat.MANGA,
-      MediaFormat.movie => Enum$MediaFormat.MOVIE,
-      MediaFormat.music => Enum$MediaFormat.MUSIC,
-      MediaFormat.novel => Enum$MediaFormat.NOVEL,
-      MediaFormat.ona => Enum$MediaFormat.ONA,
-      MediaFormat.oneShot => Enum$MediaFormat.ONE_SHOT,
-      MediaFormat.ova => Enum$MediaFormat.OVA,
-      MediaFormat.special => Enum$MediaFormat.SPECIAL,
-      MediaFormat.tv => Enum$MediaFormat.TV,
-      MediaFormat.tvShort => Enum$MediaFormat.TV_SHORT,
-      MediaFormat.$unknown => Enum$MediaFormat.$unknown,
-    };
-  }
-}
-
-extension _Enum$MediaFormatExtension on Enum$MediaFormat {
-  MediaFormat toMediaFormat() {
-    return switch (this) {
-      Enum$MediaFormat.MANGA => MediaFormat.manga,
-      Enum$MediaFormat.MOVIE => MediaFormat.movie,
-      Enum$MediaFormat.MUSIC => MediaFormat.music,
-      Enum$MediaFormat.NOVEL => MediaFormat.novel,
-      Enum$MediaFormat.ONA => MediaFormat.ona,
-      Enum$MediaFormat.ONE_SHOT => MediaFormat.oneShot,
-      Enum$MediaFormat.OVA => MediaFormat.ova,
-      Enum$MediaFormat.SPECIAL => MediaFormat.special,
-      Enum$MediaFormat.TV => MediaFormat.tv,
-      Enum$MediaFormat.TV_SHORT => MediaFormat.tvShort,
-      Enum$MediaFormat.$unknown => MediaFormat.$unknown,
     };
   }
 }

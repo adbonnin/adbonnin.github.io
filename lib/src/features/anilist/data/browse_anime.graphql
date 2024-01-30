@@ -1,6 +1,7 @@
 query BrowseAnime(
     $page: Int = 1
     $format: [MediaFormat]
+    $episodeGreater: Int
     $season: MediaSeason
     $seasonYear: Int
     $year: String
@@ -14,6 +15,7 @@ query BrowseAnime(
             hasNextPage
         }
         media(
+            episodes_greater: $episodeGreater
             season: $season
             format_in: $format
             seasonYear: $seasonYear

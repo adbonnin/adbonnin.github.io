@@ -8,6 +8,19 @@ enum Season {
 
   final int animeOrder;
 
+  Season get previous {
+    return switch (this) {
+      Season.spring => Season.winter,
+      Season.summer => Season.spring,
+      Season.fall => Season.summer,
+      Season.winter => Season.fall,
+    };
+  }
+
+  int previousYear(int year) {
+    return year - (this == Season.winter ? 1 : 0);
+  }
+
   static int animeComparator(Season a, Season b) {
     return a.animeOrder - b.animeOrder;
   }
