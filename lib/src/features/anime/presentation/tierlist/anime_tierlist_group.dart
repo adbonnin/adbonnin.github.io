@@ -27,7 +27,7 @@ class AnimeTierListGroupState extends State<AnimeTierListGroup> {
   @override
   void initState() {
     super.initState();
-    imageControllers = List.generate(widget.anime.length, (index) => WidgetToImageController());
+    imageControllers = List.generate(widget.anime.length, (_) => WidgetToImageController());
   }
 
   @override
@@ -35,7 +35,7 @@ class AnimeTierListGroupState extends State<AnimeTierListGroup> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.anime.length != oldWidget.anime.length) {
-      imageControllers = List.generate(widget.anime.length, (index) => WidgetToImageController());
+      imageControllers = List.generate(widget.anime.length, (_) => WidgetToImageController());
     }
   }
 

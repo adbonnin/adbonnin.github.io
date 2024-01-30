@@ -16,6 +16,7 @@ import 'package:portfolio/src/l10n/app_localizations.dart';
 import 'package:portfolio/src/utils/iterable_extensions.dart';
 import 'package:portfolio/src/utils/number.dart';
 import 'package:portfolio/src/utils/season.dart';
+import 'package:portfolio/src/utils/string_extension.dart';
 import 'package:portfolio/src/widgets/async_value_widget.dart';
 import 'package:portfolio/src/widgets/info_label.dart';
 import 'package:portfolio/src/widgets/loading_icon.dart';
@@ -227,9 +228,9 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     });
 
     try {
-      final seasonLabel = context.loc.season(_season).toLowerCase();
+      final seasonLabel = context.loc.season(_season);
 
-      final name = 'tierlist-$_year-$seasonLabel';
+      final name = 'TierList $_year $seasonLabel';
       final bytes = await _buildZip();
       const ext = '.zip';
       const mimeType = MimeType.zip;
@@ -268,25 +269,34 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
   Future<Uint8List> _buildZip() async {
     final archive = Archive();
 
-    final keysByName = {
-      'tv': _tvKey,
-      'tv_short': _tvShortKey,
-      'leftover': _leftoverKey,
-      'movie': _movieKey,
-      'ova_ona_special': _ovaOnaSpecialKey,
-    };
+    final keys = [
+      _tvKey,
+      _tvShortKey,
+      _leftoverKey,
+      _movieKey,
+      _ovaOnaSpecialKey,
+    ];
 
-    final total = keysByName.values //
+    final total = keys //
         .map<int>((key) => key.currentState?.imageControllers.length ?? 0)
         .sum;
 
     var offset = 1;
 
-    for (final etr in keysByName.entries) {
-      final basename = etr.key;
-      final imageControllers = etr.value.currentState?.imageControllers ?? [];
+    for (final keys in keys) {
+      final currentState = keys.currentState;
 
-      await _addCapturesToArchive(archive, total, offset, basename, imageControllers);
+      if (currentState == null) {
+        continue;
+      }
+
+      final groupText = currentState.widget.groupText //
+          .removeSpecialCharacters()
+          .removeMultipleSpace();
+
+      final imageControllers = currentState.imageControllers;
+
+      await _addCapturesToArchive(archive, total, offset, groupText, imageControllers);
       offset += imageControllers.length;
     }
 
@@ -305,17 +315,17 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
     Archive archive,
     int total,
     int offset,
-    String basename,
-    List<WidgetToImageController> controllers,
+    String groupText,
+    List<WidgetToImageController> imageControllers,
   ) async {
-    if (controllers.isEmpty) {
+    if (imageControllers.isEmpty) {
       return;
     }
 
-    final numberFormat = Numbers.numberFormatFromDigits(controllers.length);
+    final numberFormat = Numbers.numberFormatFromDigits(imageControllers.length);
 
-    for (var i = 0; i < controllers.length; i++) {
-      final imageController = controllers[i];
+    for (var i = 0; i < imageControllers.length; i++) {
+      final imageController = imageControllers[i];
       final image = await imageController.capture();
 
       if (image == null) {
@@ -325,7 +335,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
       final index = numberFormat.format(offset + i);
 
       final file = ArchiveFile(
-        '$index-$basename.png',
+        '$index $groupText.png',
         image.lengthInBytes,
         image,
       );
