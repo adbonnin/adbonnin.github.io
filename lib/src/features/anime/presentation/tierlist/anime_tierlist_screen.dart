@@ -13,6 +13,7 @@ import 'package:portfolio/src/features/anime/domain/anime_preference.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_group.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist_edit/anime_tierlist_edit_dialog.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
+import 'package:portfolio/src/utils/anime.dart';
 import 'package:portfolio/src/utils/iterable_extensions.dart';
 import 'package:portfolio/src/utils/number.dart';
 import 'package:portfolio/src/utils/season.dart';
@@ -80,7 +81,7 @@ class _AnimeTierListScreenState extends ConsumerState<AnimeTierListScreen> {
                 child: DropdownButtonFormField(
                   value: _season,
                   items: Season.values //
-                      .sorted(Season.animeComparator)
+                      .sorted(animeSeasonComparator)
                       .map(_buildSeason)
                       .toList(),
                   decoration: const InputDecoration(

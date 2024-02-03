@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:graphql/client.dart';
 import 'package:portfolio/src/features/anilist/data/browse_anime.graphql.dart';
 import 'package:portfolio/src/features/anilist/data/schema.graphql.dart';
+import 'package:portfolio/src/utils/anime.dart';
 import 'package:portfolio/src/utils/iterable_extensions.dart';
 import 'package:portfolio/src/utils/season.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -28,7 +29,7 @@ class AnilistService {
     required Season season,
   }) {
     return browseAnime(
-      year: season.previousYear(year),
+      year: season.previousAnimeYear(year),
       season: season.previous,
       episodeGreeter: 16,
     );

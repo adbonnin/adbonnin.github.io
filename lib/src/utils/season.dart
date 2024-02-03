@@ -1,12 +1,8 @@
 enum Season {
-  spring(animeOrder: 1),
-  summer(animeOrder: 2),
-  fall(animeOrder: 3),
-  winter(animeOrder: 0);
-
-  const Season({required this.animeOrder});
-
-  final int animeOrder;
+  spring,
+  summer,
+  fall,
+  winter;
 
   Season get previous {
     return switch (this) {
@@ -15,14 +11,6 @@ enum Season {
       Season.fall => Season.summer,
       Season.winter => Season.fall,
     };
-  }
-
-  int previousYear(int year) {
-    return year - (this == Season.winter ? 1 : 0);
-  }
-
-  static int animeComparator(Season a, Season b) {
-    return a.animeOrder - b.animeOrder;
   }
 }
 
