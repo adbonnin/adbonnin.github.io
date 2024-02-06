@@ -12,6 +12,7 @@ import 'package:portfolio/src/features/anime/domain/anime.dart';
 import 'package:portfolio/src/features/anime/domain/anime_preference.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist/anime_tierlist_group.dart';
 import 'package:portfolio/src/features/anime/presentation/tierlist_edit/anime_tierlist_edit_dialog.dart';
+import 'package:portfolio/src/l10n/app_localization_extension.dart';
 import 'package:portfolio/src/l10n/app_localizations.dart';
 import 'package:portfolio/src/utils/anime.dart';
 import 'package:portfolio/src/utils/iterable_extensions.dart';
