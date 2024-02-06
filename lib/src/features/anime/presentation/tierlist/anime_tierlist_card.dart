@@ -16,8 +16,6 @@ class AnimeTierListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverUrl = anime.coverImageMedium;
-
     return InkWell(
       onTap: onTap,
       child: SizedBox(
@@ -26,7 +24,7 @@ class AnimeTierListCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CoverImage(imageUrl: coverUrl),
+              child: CoverImage(imageUrl: anime.coverImageMedium),
             ),
             Positioned(
               left: 0,
