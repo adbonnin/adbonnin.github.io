@@ -5,6 +5,8 @@ date:   2024-10-27 11:26:10 +0100
 categories: flutter code
 ---
 
+## Code:
+
 Hashcode:
 
 ```dart
@@ -27,4 +29,6 @@ bool operator ==(Object other) {
 }
 ```
 
-[packages/flutter/lib/src/material/filled_button_theme.dart]: https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/filled_button_theme.dart
+## Reference:
+
+- [packages/flutter/lib/src/material/filled_button_theme.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/filled_button_theme.dart)
