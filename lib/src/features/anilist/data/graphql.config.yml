@@ -1,6 +1,0 @@
-schema: schema.graphql
-documents: '**/*.graphql'
-extensions:
-  endpoints:
-    AniList:
-      url: https://graphql.anilist.co/
