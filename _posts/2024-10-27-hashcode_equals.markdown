@@ -1,18 +1,18 @@
 ---
 layout: post
-title:  "Equals et hashcode"
+title:  "Hashcode et equals"
 date:   2024-10-27 11:26:10 +0100
 categories: flutter code
 ---
 
-Equals:
+Hashcode:
 
 ```dart
 @override
 int get hashCode => style.hashCode;
 ```
 
-Hashcode:
+Equals:
 
 ```dart
 @override
